@@ -1,0 +1,30 @@
+.idea/
+.vscode/
+node_modules/
+build/
+tmp/
+temp/
+dist/
+logs/
+# General
+.DS_Store
+
+# 环境变量（重要！禁止把数据库密码、密钥提交仓库）
+.env
+.env.local
+.env.development
+.env.production
+
+# TypeScript 缓存
+*.tsbuildinfo
+
+# Jest 测试覆盖率
+coverage/
+
+# 操作系统 Windows 缓存
+Thumbs.db
+
+# debug日志
+*.log
+pnpm-debug.log*
+npm-debug.log*

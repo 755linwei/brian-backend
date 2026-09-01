@@ -1,0 +1,87 @@
+用户表
+{
+  "username": "mary",
+  "password": "445663",
+  "roles": [1, 2]
+}
+{
+  "username": "jackchen",
+  "password": "770369",
+  "roles": [2]
+}
+{
+  "username": "mackasser",
+  "new-username": "mackasser-new",
+  "password": "770887",
+  "new-password":"333444",
+  "roles": [2,3]
+}
+{
+  "username": "adminer",
+  "password": "445142",
+  "roles": [1,2]
+}
+{
+  "username": "xuefeng",
+  "password": "412336",
+  "roles":[{"id":1},{"id":2}]
+}
+{
+  "username": "xuefeng",
+  "password": "412336",
+  "password-modify":"002001"
+  "roles": [1,2]
+}
+{
+    "username": "yangdaxia",
+    "password": "669996",
+    "profile": {
+        "gender": "男",
+        "address": "北京市顺义区",
+        "photo": "https://p5.ssl.qhimgs1.com/sdr/400__/t01a5445f17d1f6c495.jpg"
+    },
+    "roles": [
+            {
+                "id": 3,
+                "name": "测试"
+            }
+    ]
+}
+{
+    "username": "xiaolongnv",
+    "password": "669996",
+    "profile": {
+        "gender": "女",
+        "address": "北京市顺义区",
+        "photo": "https://p5.ssl.qhimgs1.com/sdr/400__/t01a5445f17d1f6c495.jpg"
+    },
+    "roles": [
+            {
+                "id": 3,
+                "name": "测试"
+            }
+    ]
+}
+
+ {
+    "name": "用户管理",
+    "path": "/users",
+    "order": 2,
+    "acl": "READ,CREATE,UPDATE,DELETE,MANAGE"
+  },
+  {
+    "name": "角色管理",
+    "path": "/roles",
+    "order": 3,
+    "acl": "READ,CREATE,UPDATE,DELETE,MANAGE"
+  },
+  {
+    "name": "菜单管理",
+    "path": "/menus",
+    "order": 4,
+    "acl": "READ,CREATE,UPDATE,DELETE,MANAGE"
+  }
+  {
+    "name": "系统日志",
+    "path": "/system-log"
+  }
