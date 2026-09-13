@@ -44,8 +44,18 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm' # pnpm依赖缓存，加速流水线
 
+      # ✅第一步先安装pnpm！！
       - name: Install pnpm ${{ env.PNPM_VERSION }}
-        run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+       # ✅再设置node版本，cache开启pnpm依赖缓存
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'pnpm' # 缓存pnpm的node_modules，加速CI
 
       # 3.安装全部依赖(dev+prod)
       - name: Install dependencies
