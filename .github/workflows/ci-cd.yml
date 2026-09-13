@@ -37,13 +37,6 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      # 2.设置node + pnpm环境
-      - name: Setup Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm' # pnpm依赖缓存，加速流水线
-
       # ✅第一步先安装pnpm！！
       - name: Install pnpm ${{ env.PNPM_VERSION }}
         uses: pnpm/action-setup@v3
