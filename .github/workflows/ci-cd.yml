@@ -2,11 +2,15 @@
 name: Brian-Backend CI/CD
 
 # 触发条件：①push到main分支；②所有pull request；
+
+# 只允许手动触发（在 GitHub 网页 Actions 页面点 "Run workflow"）
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch:
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
 
 # 全局变量
 env:
@@ -86,6 +90,9 @@ jobs:
     needs: test-build
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write      # ← 加这两行
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
