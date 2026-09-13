@@ -1,0 +1,111 @@
+# .github/workflows/ci-cd.yml
+name: Brian-Backend CI/CD
+
+# 触发条件：①push到main分支；②所有pull request；
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# 全局变量
+env:
+  NODE_VERSION: '22'
+  PNPM_VERSION: '11.5.2'
+  DOCKER_IMAGE_NAME: brian-backend
+  DOCKER_REGISTRY: ghcr.io # 可以改为docker.io阿里云镜像仓库
+
+jobs:
+  # ========= Job1：代码校验、单元测试、e2e、编译构建 =========
+  test-build:
+    runs-on: ubuntu-latest
+    services:
+        mysql:
+          image: mysql:8.0
+          env:
+            MYSQL_ROOT_PASSWORD: test123456
+            MYSQL_DATABASE: nestjs-backend
+          ports:
+            - 3306:3306
+          options: >-
+            --health-cmd="mysqladmin ping -uroot -ptest123456"
+            --health-interval=5s
+            --health-timeout=10s
+            --health-retries=10
+    steps:
+      # 1.拉取github仓库源码
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      # 2.设置node + pnpm环境
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm' # pnpm依赖缓存，加速流水线
+
+      - name: Install pnpm ${{ env.PNPM_VERSION }}
+        run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+
+      # 3.安装全部依赖(dev+prod)
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --dangerously-allow-all-builds
+
+      # 4.eslint代码格式化校验
+      - name: ESLint check
+        run: pnpm run lint
+
+      # 5.✅单元测试 jest (*.spec.ts)
+      - name: Run Unit Test
+        run: pnpm run test
+
+      # 6.✅E2E测试（注意：e2e需要数据库！CI环境需要启动mysql服务容器）
+      - name: Run E2E Test
+        run: pnpm run test:e2e
+       
+        env:
+          # CI流水线给e2e注入数据库环境变量
+          DB_TYPE: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USERNAME: root
+          DB_PASSWORD: test123456
+          DB_DATABASE: nestjs-backend
+          NODE_ENV: test
+
+      # 7.✅TS编译构建，验证nest build能正常产出dist
+      - name: Nest Build compile
+        run: pnpm run build
+
+  # ========= Job2：仅main分支触发：构建Docker生产镜像 =========
+  build-docker:
+    # 依赖：test-build全部通过，才会执行镜像构建
+    needs: test-build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      # 开启docker buildx构建工具
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      ########## 【可选】如果你要推送到GHCR(GitHub容器镜像仓库)，打开下面登录配置 ##########
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 构建生产镜像，使用你项目的 Dockerfile.prod
+      - name: Build docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.prod
+          push: true # push:false=只本地构建镜像不推送；如果要推送镜像改为true，上面登录打开
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+            ${{ env.DOCKER_REGISTRY }}/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}

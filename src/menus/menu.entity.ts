@@ -19,7 +19,7 @@ export class Menus {
   @Column()
   path: string;
 
-  @Column({default:0})
+  @Column({ default: 0 })
   order: number;
 
   // 不要通过string存数组 -> 5个操作策略

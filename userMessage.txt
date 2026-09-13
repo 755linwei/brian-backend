@@ -1,6 +1,6 @@
 用户表
 {
-  "username": "mary",
+  "username": "marysaa",
   "password": "445663",
   "roles": [1, 2]
 }
@@ -79,7 +79,7 @@
     "name": "菜单管理",
     "path": "/menus",
     "order": 4,
-    "acl": "READ,CREATE,UPDATE,DELETE,MANAGE"
+    "acl": "READ,CREATE,UPDATE,DELETE"
   }
   {
     "name": "系统日志",

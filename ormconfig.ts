@@ -18,15 +18,15 @@ export function getServerConfig() {
   const envConfig = getEnv(`.env.${process.env.NODE_ENV || 'development'}`);
   // configService
   const config = { ...defaultConfig, ...envConfig };
-  return config;
+  // ✅核心修复：合并【系统进程环境变量】，优先级最高！docker compose注入的变量在这里生效
+  const finalConfig={ ...config ,...process.env};
+  return finalConfig;
 }
 
 // 通过dotENV来解析不同的配置
 export function buildConnectionOptions() {
-  const defaultConfig = getEnv('.env');
-  const envConfig = getEnv(`.env.${process.env.NODE_ENV || 'development'}`);
   // configService
-  const config = { ...defaultConfig, ...envConfig };
+  const config = getServerConfig();
 
   const logFlag = config['LOG_ON'] === 'true';
   //修改 ormconfig.ts 临时关闭实体扫描
@@ -35,16 +35,20 @@ export function buildConnectionOptions() {
     process.env.NODE_ENV === 'test'
       ? [__dirname + '/**/*.entity.ts']
       : [__dirname + '/**/*.entity{.js,.ts}'];
-console.log('ormconfig-entitiesDir', entitiesDir);
+  console.log('ormconfig-entitiesDir', entitiesDir);
+  console.log('DB_TYPE=', config[ConfigEnum.DB_TYPE]);
+  console.log('DB_HOST=', config[ConfigEnum.DB_HOST]);
+  console.log('DB_PORT=', config[ConfigEnum.DB_PORT]);
+  console.log('DB_USERNAME=', config[ConfigEnum.DB_USERNAME]);
   return {
     type: config[ConfigEnum.DB_TYPE],
     host: config[ConfigEnum.DB_HOST],
-    port: config[ConfigEnum.DB_PORT],
+    port: Number(config[ConfigEnum.DB_PORT]),
     username: config[ConfigEnum.DB_USERNAME],
     password: config[ConfigEnum.DB_PASSWORD],
     database: config[ConfigEnum.DB_DATABASE],
      // 新增
-  extra: {
+    extra: {
     multipleStatements: true
   },
     entities: entitiesDir,
@@ -55,10 +59,19 @@ console.log('ormconfig-entitiesDir', entitiesDir);
   } as TypeOrmModuleOptions;
 }
 
-export const connectionParams = buildConnectionOptions();
+// export const connectionParams = buildConnectionOptions();
 
-export default new DataSource({
-  ...connectionParams,
-  migrations: ['src/migrations/**'],
-  subscribers: [],
-} as DataSourceOptions);
+// export default new DataSource({
+//   ...connectionParams,
+//   migrations: ['src/migrations/**'],
+//   subscribers: [],
+// } as DataSourceOptions);
+export function createDataSource(): DataSource {
+  const connectionParams = buildConnectionOptions();
+  const dsOptions: DataSourceOptions = {
+    ...(connectionParams as DataSourceOptions),
+    migrations: ['src/migrations/**'],
+    subscribers: [],
+  };
+  return new DataSource(dsOptions);
+}

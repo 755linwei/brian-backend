@@ -17,7 +17,6 @@ export const getEntities = (path: string) => {
     const key = Object.keys(map)[i];
     if (path.startsWith(key)) {
       return map[key];
-      
     }
   }
 };

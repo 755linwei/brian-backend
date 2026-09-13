@@ -3,23 +3,30 @@ version: '3.1'
 
 services:
   db:
-    image: mysql
+    image:  mysql:8.0
     # NOTE: use of "mysql_native_password" is not recommended: https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
     # (this is just an example, not intended to be a production configuration)
     command: --default-authentication-plugin=mysql_native_password
-    restart: always
+    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: example
+      MYSQL_ROOT_PASSWORD: 755621 
+      MYSQL_DATABASE: nestdb
     ports:
-      - 3306:3306
+      - 3308:3306
+     # ✅mysql健康检查
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-uroot", "-p755621"]
+      interval: 5s
+      timeout: 10s
+      retries: 10  
   db1:
-    image: mysql
+    image:  mysql:8.0
     # NOTE: use of "mysql_native_password" is not recommended: https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
     # (this is just an example, not intended to be a production configuration)
     command: --default-authentication-plugin=mysql_native_password
-    restart: always
+    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: example
+      MYSQL_ROOT_PASSWORD: 755621 
       MYSQL_DATABASE: testdb1
       # MYSQL_USER MYSQL_PASSWORD
     ports:
@@ -28,6 +35,37 @@ services:
   # navicat
   adminer:
     image: adminer
-    restart: always
+    restart: unless-stopped
     ports:
       - 8080:8080
+
+# ============新增：nestjs后端服务，关联本地Dockerfile ============
+  nest-api:
+    # build：本地上下文+指定Dockerfile，会自动执行docker build
+    build:
+      context: .              # 上下文：当前docker-compose.yml所在目录（项目根）
+      dockerfile: Dockerfile  # 项目根目录的Dockerfile文件名
+    # 构建完成后运行的容器配置
+    restart: unless-stopped
+    ports:
+      - "13000:13000" # 对外暴露13000端口
+    volumes:
+      - ./logs:/app/logs # 映射日志目录，对应Dockerfile VOLUME ["/app/logs"]
+    environment:
+      DOCKER: "true" # 新增，通知ConfigModule忽略磁盘.env文件
+      # ⚠容器内部运行，访问同compose网络的db服务，host=db，端口容器内3306，不是宿主机3308！！
+      NODE_ENV: development
+       # ✅补上缺失 DB_TYPE！！！
+      DB_TYPE: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USERNAME: root
+      DB_PASSWORD: 755621
+      DB_DATABASE: nestdb
+      DB_SYNC: "false"
+      # JWT secret
+      SECRET: "mHgGuoJYOuiXILqnXyqKQ1joRQ6YhoPBb6CUfVp6qi1BBK2rtQNjsgaxRxRAsOii"
+      APP_PORT: "13000"
+    depends_on:
+      db: # 依赖db容器启动；仅等待容器进程启动，不等mysql初始化完成！
+        condition: service_healthy # ✅等待mysql健康检测通过，再启动nest-api

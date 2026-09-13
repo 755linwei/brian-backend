@@ -1,4 +1,4 @@
-import { Injectable,HttpException } from '@nestjs/common';
+import { Injectable, HttpException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateMenuDto } from './dto/create-menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
@@ -21,16 +21,14 @@ export class MenusService {
     // throw new HttpException('测试异常日志写入', 400);
 
     return this.menuRepository.find({ relations: ['roles'] });
-    
-}
-  
+  }
 
   findOne(id: number) {
     return this.menuRepository.findOne({
       where: {
         id,
       },
-      relations: ['roles'] 
+      relations: ['roles'],
     });
   }
 
@@ -42,8 +40,7 @@ export class MenusService {
   }
 
   async remove(id: number) {
-  const entity = await this.findOne(id);
-  return this.menuRepository.remove(entity);
-}
-
+    const entity = await this.findOne(id);
+    return this.menuRepository.remove(entity);
+  }
 }

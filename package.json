@@ -20,8 +20,10 @@
       "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
       "test:e2e": "jest --config ./test/jest-e2e.json --maxWorkers=1",
       "test:e2e:watch": "jest --config ./test/jest-e2e.json --maxWorkers=1 --watch",
-      "typeorm": "typeorm-ts-node-commonjs -d ormconfig.ts",
+      "typeorm": "typeorm-ts-node-commonjs -d data-source-cli.ts",
       "migration:generate": "f() { pnpm run typeorm migration:generate -p \"./src/migrations/$@\"; }; f",
+      "migration:generate:dev:linux": " typeorm-ts-node-commonjs -d data-source-cli.ts migration:generate -p \"./src/migrations/$@\"",
+      "migration:generate:dev:windows": "typeorm-ts-node-commonjs -d data-source-cli.ts migration:generate",
       "migration:create": "typeorm-ts-node-commonjs migration:create",
       "migration:run": "pnpm run typeorm migration:run",
       "migration:revert": "pnpm run typeorm migration:revert",
@@ -103,7 +105,8 @@
          "<rootDir>/"
       ],
       "moduleNameMapper": {
-         "^src(.*)$": "<rootDir>/src$1"
+    "^@/(.*)$": "<rootDir>/$1",
+     "^src/(.*)$": "<rootDir>/$1"
       }
    },
    "_moduleAliases": {

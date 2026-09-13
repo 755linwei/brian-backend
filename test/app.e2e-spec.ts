@@ -9,11 +9,11 @@ import * as Spec from 'pactum/src/models/Spec';
 
 describe('AppController (e2e)', () => {
   // let app: INestApplication;
-  let spec;
+  let spec: Spec;
   beforeEach(() => {
     // console.log('app', global.app);
     // pactum.request.setBaseUrl('http://localhost:3000');
-    spec = global.pactum as Spec;
+    spec = global.pactum.spec();
   });
 
   it('/ (GET)', () => {

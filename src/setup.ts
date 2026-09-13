@@ -29,7 +29,7 @@ export const setupApp = (app: INestApplication) => {
       // 去除在类上不存在的字段
       whitelist: true,
       //自动将传入的参数类型转换为DTO中定义的类型
-      transform: true, 
+      transform: true,
     }),
   );
 

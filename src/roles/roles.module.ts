@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Roles } from './roles.entity';
 import { Menus } from '@/menus/menu.entity'; // ✅导入Menus实体
 @Module({
-  imports: [TypeOrmModule.forFeature([Roles,Menus])],
+  imports: [TypeOrmModule.forFeature([Roles, Menus])],
   controllers: [RolesController],
   providers: [RolesService],
 })

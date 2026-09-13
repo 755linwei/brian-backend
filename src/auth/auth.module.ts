@@ -1,4 +1,4 @@
-import { Global, Module, } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
@@ -17,7 +17,7 @@ import { LogsService } from 'src/logs/logs.service';
   imports: [
     UserModule,
     PassportModule,
-     LogsModule, // ✅加上LogsModule
+    LogsModule, // ✅加上LogsModule
     TypeOrmModule.forFeature([Logs]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -35,8 +35,8 @@ import { LogsService } from 'src/logs/logs.service';
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService, JwtStrategy, CaslAbilityService,LogsService],
+  providers: [AuthService, JwtStrategy, CaslAbilityService, LogsService],
   controllers: [AuthController],
-  exports: [CaslAbilityService,LogsService],
+  exports: [CaslAbilityService, LogsService],
 })
 export class AuthModule {}

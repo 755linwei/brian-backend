@@ -22,13 +22,14 @@ import { LogsService } from 'src/logs/logs.service';
 import * as requestIp from 'request-ip';
 
 @Controller('auth')
- @Public()
+@Public()
 // @TypeOrmDecorator()
 @UseInterceptors(ClassSerializerInterceptor)
 @UseFilters(new TypeormFilter())
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
-  constructor(private authService: AuthService,
+  constructor(
+    private authService: AuthService,
     // ✅注入日志服务
     private readonly logsService: LogsService,
   ) {}
@@ -39,7 +40,7 @@ export class AuthController {
   }
 
   @Post('/signin')
-  async signin(@Body() dto: SigninUserDto,@Req() req: Request) {
+  async signin(@Body() dto: SigninUserDto, @Req() req: Request) {
     const { username, password } = dto;
     const token = await this.authService.signin(username, password);
     this.logger.log(`[AuthController signin] 登录响应返回token`);
@@ -55,7 +56,7 @@ export class AuthController {
       }),
       result: 200,
       // 登录成功后，此时还没有经过JwtGuard，req.user还不存在！拿不到userId，user不赋值
-      user:undefined,
+      user: undefined,
     });
     return {
       access_token: token,
@@ -63,11 +64,11 @@ export class AuthController {
   }
 
   @Post('/signup')
-  
+
   // @UseInterceptors(SerializeInterceptor)
-  async signup(@Body() dto: SigninUserDto,@Req() req: Request) {
+  async signup(@Body() dto: SigninUserDto, @Req() req: Request) {
     const { username, password } = dto;
-   const res = await this.authService.signup(username, password);
+    const res = await this.authService.signup(username, password);
     this.logger.log(`[AuthController signup] 注册完成返回用户数据`);
 
     // ✅调用 createLog，记录注册成功日志

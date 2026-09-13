@@ -30,10 +30,10 @@ import { Serialize } from 'src/decorators/serialize.decorator';
 import { PublicUserDto } from './dto/public-user.dto';
 import { Public } from 'src/decorators/public.decorator';
 @Controller('user')
-  @UseFilters(new TypeormFilter())
-  /**会先后执行两套 jwt 校验：先跑原生 AuthGuard，再跑你封装的 JwtGuard 子类，重复校验 */
+@UseFilters(new TypeormFilter())
+/**会先后执行两套 jwt 校验：先跑原生 AuthGuard，再跑你封装的 JwtGuard 子类，重复校验 */
 // )
-// 
+//
 export class UserController {
   // private logger = new Logger(UserController.name);
 
@@ -47,7 +47,6 @@ export class UserController {
   }
 
   @Get('/profile')
-
   getUserProfile(
     @Query('id', ParseIntPipe) id: any,
     // 这里req中的user是通过AuthGuard('jwt')中的validate方法返回的
@@ -67,14 +66,14 @@ export class UserController {
   @Get('/logs')
   // getUserLogs( @Query('id', ParseIntPipe) id: number,): any {
   //   return this.userService.findUserLogs(id);
-    // }
-    getUserLogs(@Req() req: any) {
-  const userId = req.user.userId;
-  return this.userService.findUserLogs(userId);
-}
+  // }
+  getUserLogs(@Req() req: any) {
+    const userId = req.user.userId;
+    return this.userService.findUserLogs(userId);
+  }
 
   @Get('/logsByGroup')
-  async getLogsByGroup(@Query('id', ParseIntPipe) id: any,): Promise<any> {
+  async getLogsByGroup(@Query('id', ParseIntPipe) id: any): Promise<any> {
     const res = await this.userService.findLogsByGroup(id);
     // return res.map((o) => ({
     //   result: o.result,
@@ -90,7 +89,6 @@ export class UserController {
   // @UseGuards(AuthGuard('jwt'))
   // 2. 如果使用UseGuard传递多个守卫，则从前往后执行，如果前面的Guard没有通过，则后面的Guard不会执行
   // @UseGuards(AdminGuard)
-   
   @Serialize(PublicUserDto)
   getUsers(@Query() query: getUserDto): any {
     // page - 页码，limit - 每页条数，condition-查询条件(username, role, gender)，sort-排序
@@ -103,10 +101,10 @@ export class UserController {
   }
 
   @Post()
-    //不安全
-    @Public()
+  //不安全
+  @Public()
   addUser(@Body(CreateUserPipe) dto: CreateUserDto): any {
-    this.logger.log('收到dto',dto); 
+    this.logger.log('收到dto', dto);
     const user = dto;
     // user -> dto.username
     // return this.userService.addUser();
@@ -114,14 +112,12 @@ export class UserController {
   }
 
   @Get('/:id')
-  
   getUser(@Param('id', ParseIntPipe) id: number): any {
     // return 'hello world';
     return this.userService.getUser(id);
   }
 
   @Patch('/:id')
-  
   updateUser(
     @Body() dto: any,
     @Param('id', ParseIntPipe) id: number,
@@ -149,7 +145,6 @@ export class UserController {
   // 1.controller名 vs service名 vs repository名应该怎么取
   // 2.typeorm里面delete与remove的区别
   @Delete('/:id') // RESTfull Method
-    
   removeUser(@Param('id') id: number): any {
     // 权限：判断用户是否有更新user的权限
     return this.userService.remove(id);

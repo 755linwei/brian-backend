@@ -3,7 +3,7 @@ import * as Spec from 'pactum/src/models/Spec';
 describe('Auth登录认证 e2e测试', () => {
   let spec: Spec;
   beforeEach(() => {
-    spec = global.spec as Spec;
+    spec = global.pactum.spec();
   });
 
   // 注册用户
@@ -22,8 +22,8 @@ describe('Auth登录认证 e2e测试', () => {
         username: user.username,
         roles: [
           {
-            id: 2,
-            name: '普通用户',
+            id: 1,
+            name: '默认角色',
           },
         ],
       });
@@ -63,7 +63,7 @@ describe('Auth登录认证 e2e测试', () => {
   // 登录用户
   it('登录用户', async () => {
     const user = {
-      username: 'toimc1',
+      username: 'dfgsdghrfnmgfjfg',
       password: '123456',
     };
 

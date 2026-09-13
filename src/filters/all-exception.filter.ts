@@ -6,9 +6,8 @@ import {
   Logger,
   Injectable,
 } from '@nestjs/common';
-import { ArgumentsHost, Catch, } from '@nestjs/common';
-import { ModuleRef,} from '@nestjs/core';
-
+import { ArgumentsHost, Catch } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
 
 import * as requestIp from 'request-ip';
 import { LogsService } from 'src/logs/logs.service';
@@ -19,15 +18,16 @@ export class AllExceptionFilter implements ExceptionFilter {
   private logger!: Logger;
   private logsService!: LogsService;
 
-  constructor(private readonly moduleRef: ModuleRef,
-  ) {}
+  constructor(private readonly moduleRef: ModuleRef) {}
   async onModuleInit() {
     this.logger = this.moduleRef.get(Logger, { strict: false });
     this.logsService = this.moduleRef.get(LogsService, { strict: false });
   }
-    async catch(exception: unknown, host: ArgumentsHost) {
-   this.logger.log('AllExceptionFilter捕获到异常,参数exception', exception);
-   this.logger.log('AllExceptionFilter捕获到异常,参数host', host);
+  // async catch(exception: unknown, host: ArgumentsHost) {
+  // 把 async 去掉！catch不能是async
+  catch(exception: unknown, host: ArgumentsHost) {
+    this.logger.error('AllExceptionFilter捕获到异常,参数exception', exception);
+    this.logger.error('AllExceptionFilter捕获到异常,参数host', host);
     const ctx = host.switchToHttp();
     const request = ctx.getRequest();
     const response = ctx.getResponse();
@@ -62,7 +62,8 @@ export class AllExceptionFilter implements ExceptionFilter {
     this.logger.error('[toimc]', responseBody);
     // ==========存入数据库Logs表 核心代码==========
     try {
-      await this.logsService.createLog({
+      // await this.logsService.createLog({
+      this.logsService.createLog({
         path: request.url, // 请求路径
         methods: request.method, // ✅methods来源：request.method  GET/POST/PUT/DELETE
         data: JSON.stringify({
@@ -73,7 +74,6 @@ export class AllExceptionFilter implements ExceptionFilter {
         result: httpStatus,
         // 如果登录用户存在，绑定用户
         user: request.user?.userId ? undefined : undefined, // 这里可以根据实际情况绑定用户
-
       });
     } catch (e) {
       // 防止写日志自身报错，不影响主异常返回

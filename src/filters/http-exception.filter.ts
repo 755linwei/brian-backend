@@ -13,16 +13,17 @@ import { LogsService } from '@/logs/logs.service';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
-  constructor(private logger: LoggerService,
+  constructor(
+    private logger: LoggerService,
     private logsService: LogsService,
-    @Inject(ModuleRef) private readonly moduleRef: ModuleRef
-  ) { }    
+    @Inject(ModuleRef) private readonly moduleRef: ModuleRef,
+  ) {}
   // onModuleInit 生命周期，等待模块初始化完成后拿到LogsService实例
   async onModuleInit() {
     this.logsService = this.moduleRef.get(LogsService, { strict: false });
   }
 
- async catch(exception: HttpException, host: ArgumentsHost) {
+  async catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();

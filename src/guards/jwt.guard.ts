@@ -1,5 +1,5 @@
 import { AuthGuard } from '@nestjs/passport';
-import { Logger, ExecutionContext,Injectable } from '@nestjs/common';
+import { Logger, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from 'src/decorators/public.decorator';
 
@@ -10,7 +10,7 @@ export class JwtGuard extends AuthGuard('jwt') {
   constructor(private readonly reflector: Reflector) {
     super();
   }
-async canActivate(context: ExecutionContext): Promise<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -36,5 +36,4 @@ async canActivate(context: ExecutionContext): Promise<boolean> {
     // 原有逻辑不变，原样交给父类处理
     return super.handleRequest(err, user, info, context, status);
   }
-
 }

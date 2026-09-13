@@ -1,4 +1,4 @@
-import { Injectable,NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -89,11 +89,23 @@ export class UserService {
   }
 
   findOne(id: number) {
-    return this.userRepository.findOne({ where: { id } });
+    return this.userRepository.findOne({
+      where: { id },
+      relations: {
+        profile: true, // 一对一profile
+        logs: true, // 一对多logs日志
+        roles: true, // 多对多roles
+      },
+    });
   }
 
   async create(user: Partial<User>) {
-    console.log("🚀原始user.roles:", user.roles, "类型第一项:", typeof user?.roles?.[0]);
+    console.log(
+      '🚀原始user.roles:',
+      user.roles,
+      '类型第一项:',
+      typeof user?.roles?.[0],
+    );
     if (!user.roles) {
       const role = await this.rolesRepository.findOne({ where: { id: 2 } });
       user.roles = [role];
@@ -109,28 +121,30 @@ export class UserService {
     }
 
     // 兼容两种：number[] 或者 {id:number}[]
-  // if (Array.isArray(user.roles)) {
-  //   // 提取所有id
-  //   const roleIds = user.roles.map(item => {
-  //     return typeof item === 'number' ? item : item.id;
-  //   })
-  //   user.roles = await this.rolesRepository.find({
-  //     where: { id: In(roleIds) },
-  //   });
-  // }
-// =========新增profile兜底=========
-  if(user.profile){
-    user.profile.gender = user.profile.gender ?? 0;
-    user.profile.photo = user.profile.photo ?? "";
-    user.profile.address = user.profile.address ?? "";
-  }
+    // if (Array.isArray(user.roles)) {
+    //   // 提取所有id
+    //   const roleIds = user.roles.map(item => {
+    //     return typeof item === 'number' ? item : item.id;
+    //   })
+    //   user.roles = await this.rolesRepository.find({
+    //     where: { id: In(roleIds) },
+    //   });
+    // }
+    // =========新增profile兜底=========
+    if (user.profile) {
+      user.profile.gender = user.profile.gender ?? 0;
+      user.profile.photo = user.profile.photo ?? '';
+      user.profile.address = user.profile.address ?? '';
+    }
 
     const userTmp = await this.userRepository.create(user);
     // try {
     // 对用户密码使用argon2加密
     userTmp.password = await argon2.hash(userTmp.password);
     const res = await this.userRepository.save(userTmp);
+    console.log('🚀 ~ 注册成功', res);
     return res;
+
     // } catch (error) {
     //   console.log(
     //     '🚀 ~ file: user.service.ts ~ line 93 ~ UserService ~ create ~ error',
@@ -142,44 +156,51 @@ export class UserService {
     // }
   }
 
- async getUser(id: number) {
-  // 1. 必须用 findOne
-  // 2. 必须把 id 加上 where
-  return this.userRepository.findOne({
-    where: { id },
-    //特殊的profile属性
-    relations: ['profile', 'roles', 'roles.menus'],
-  });
-}
+  async getUser(id: number) {
+    // 1. 必须用 findOne
+    // 2. 必须把 id 加上 where
+    return this.userRepository.findOne({
+      where: { id },
+      //特殊的profile属性
+      relations: ['profile', 'roles', 'roles.menus'],
+    });
+  }
 
   async update(id: any, user: Partial<User>) {
     const userTemp = await this.findProfile(parseInt(id));
-    this.logger.log(`🚀 ~ file: user.service.ts ~ line 126 ~ UserService ~ update ~ userTemp`, userTemp);
-  if (!userTemp) {
-    throw new NotFoundException('用户不存在');
-  }
+    this.logger.log(
+      `🚀 ~ file: user.service.ts ~ line 126 ~ UserService ~ update ~ userTemp`,
+      userTemp,
+    );
+    if (!userTemp) {
+      throw new NotFoundException('用户不存在');
+    }
     //不允许更新id
     delete user.id;
     // 前端传 roles: [2,3] number[]，需要查询转成Roles实体对象数组
-  if (user.roles && Array.isArray(user.roles) && typeof user.roles[0] === 'number') {
-    user.roles = await this.rolesRepository.find({
-      where: {
-        id: In(user.roles),
-      },
-    });
-  }
-    
-  // ==========profile字段兜底防御，防止undefined进入数据库==========
-  if(user.profile){
-    // 防止undefined，全部替换为安全默认值
-    user.profile.gender = user.profile.gender ?? 0;
-    user.profile.photo = user.profile.photo ?? "";
-    user.profile.address = user.profile.address ?? "";
-  }
-  // 如果传递了password，执行加密
-  if(user.password){
-    user.password = await argon2.hash(user.password);
-  }
+    if (
+      user.roles &&
+      Array.isArray(user.roles) &&
+      typeof user.roles[0] === 'number'
+    ) {
+      user.roles = await this.rolesRepository.find({
+        where: {
+          id: In(user.roles),
+        },
+      });
+    }
+
+    // ==========profile字段兜底防御，防止undefined进入数据库==========
+    if (user.profile) {
+      // 防止undefined，全部替换为安全默认值
+      user.profile.gender = user.profile.gender ?? 0;
+      user.profile.photo = user.profile.photo ?? '';
+      user.profile.address = user.profile.address ?? '';
+    }
+    // 如果传递了password，执行加密
+    if (user.password) {
+      user.password = await argon2.hash(user.password);
+    }
     const newUser = this.userRepository.merge(userTemp, user);
     // 联合模型更新，需要使用save方法或者queryBuilder
     return this.userRepository.save(newUser);
@@ -208,7 +229,7 @@ export class UserService {
   async findUserLogs(id: number) {
     return this.logsRepository.find({
       where: {
-        user: {id}
+        user: { id },
       },
       relations: {
         user: true,

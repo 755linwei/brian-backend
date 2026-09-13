@@ -16,8 +16,8 @@ export type CaslHandlerType = PolicyHandlerCallback | PolicyHandlerCallback[];
 
 // @CheckPolicies -> handler -> ability => boolean
 export const CheckPolices = (...handlers: PolicyHandlerCallback[]) => {
-   console.log('[CheckPolices 装饰器执行] 注册handler数量：', handlers.length);
-   return SetMetadata(CHECK_POLICIES_KEY.HANDLER, handlers);
+  console.log('[CheckPolices 装饰器执行] 注册handler数量：', handlers.length);
+  return SetMetadata(CHECK_POLICIES_KEY.HANDLER, handlers);
 };
 
 // @Can -> Action, Subject, Conditions
@@ -28,7 +28,11 @@ export const Can = (
 ) =>
   SetMetadata(CHECK_POLICIES_KEY.CAN, (ability: AnyMongoAbility) => {
     const result = ability.can(action, subject, conditions);
-    console.log(`👉@Can运行校验: action=${action} subject=${String(subject)} 校验结果=${result}`);
+    console.log(
+      `👉@Can运行校验: action=${action} subject=${String(
+        subject,
+      )} 校验结果=${result}`,
+    );
     return result;
   });
 // @Cannot -> Action, Subject, Conditions
@@ -39,7 +43,10 @@ export const Cannot = (
 ) =>
   SetMetadata(CHECK_POLICIES_KEY.CANNOT, (ability: AnyMongoAbility) => {
     const result = ability.cannot(action, subject, conditions);
-    console.log(`👉@Cannot运行校验: action=${action} subject=${String(subject)} 校验结果=${result}`);
+    console.log(
+      `👉@Cannot运行校验: action=${action} subject=${String(
+        subject,
+      )} 校验结果=${result}`,
+    );
     return result;
-   }
-  );
+  });

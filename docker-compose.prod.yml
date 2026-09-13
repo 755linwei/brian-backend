@@ -3,25 +3,37 @@ version: '3.1'
 
 services:
   db:
-    image: mysql
+    image:  mysql:8.0
     # NOTE: use of "mysql_native_password" is not recommended: https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
     # (this is just an example, not intended to be a production configuration)
     command: --default-authentication-plugin=mysql_native_password
-    restart: always
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: 8jdgi5anfkr2gm00rza1wvhjm2i9o4fl
       MYSQL_DATABASE: nestjs-backend
-      MYSQL_USER: toimc
+      MYSQL_USERNAME: toimc
       MYSQL_PASSWORD: mch2lvy2o9vdo32md7bbs6kd2e7ctdcy
     volumes:
       - ./mysql_db:/var/lib/mysql
     ports:
       - 12000:3306
+  db1:
+    image:  mysql:8.0
+    # NOTE: use of "mysql_native_password" is not recommended: https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
+    # (this is just an example, not intended to be a production configuration)
+    command: --default-authentication-plugin=mysql_native_password
+    restart: no
+    environment:
+      MYSQL_ROOT_PASSWORD: 755621 
+      MYSQL_DATABASE: testdb1
+      # MYSQL_USER MYSQL_PASSWORD
+    ports:
+      - 3307:3306
 
   # navicat
   adminer:
     image: adminer
-    restart: always
+    restart: unless-stopped
     ports:
       - 12005:8080
  # 新增nest后端服务，读取Dockerfile.prod构建镜像
@@ -29,7 +41,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.prod
-    restart: always
+    restart: unless-stopped
+    env_file:
+      - ./.env.production
     ports:
       - 13000:13000
     environment:
@@ -41,3 +55,18 @@ services:
       DB_DATABASE: nestjs-backend
     depends_on:
       - db
+
+        # ============新增nginx前端服务============
+  nginx-front:
+    image: nginx:latest
+    restart: no
+    # 宿主机对外访问端口8080映射容器80
+    ports:
+      - "8080:80"
+    volumes:
+      # 前端dist静态产物，宿主机路径替换为你WSL真实路径！！
+      - ~/docker-nginx-frontend/html:/usr/share/nginx/html:ro
+      # nginx站点配置
+      - ~/docker-nginx-frontend/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - nest-api
