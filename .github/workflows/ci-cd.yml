@@ -47,8 +47,8 @@ jobs:
       - name: Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'pnpm' # 缓存pnpm的node_modules，加速CI
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm' # 缓存pnpm的node_modules，加速CI
 
       # 3.安装全部依赖(dev+prod)
       - name: Install dependencies
