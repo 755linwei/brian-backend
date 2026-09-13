@@ -102,20 +102,20 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       ########## 【可选】如果你要推送到GHCR(GitHub容器镜像仓库)，打开下面登录配置 ##########
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Login to GitHub Container Registry
+      #   uses: docker/login-action@v3
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 构建生产镜像，使用你项目的 Dockerfile.prod
-      - name: Build docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile.prod
-          push: true # push:false=只本地构建镜像不推送；如果要推送镜像改为true，上面登录打开
-          tags: |
-            ${{ env.DOCKER_REGISTRY }}/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-            ${{ env.DOCKER_REGISTRY }}/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+      # # 构建生产镜像，使用你项目的 Dockerfile.prod
+      # - name: Build docker image
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     file: ./Dockerfile.prod
+      #     push: true # push:false=只本地构建镜像不推送；如果要推送镜像改为true，上面登录打开
+      #     tags: |
+      #       ${{ env.DOCKER_REGISTRY }}/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+      #       ${{ env.DOCKER_REGISTRY }}/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
