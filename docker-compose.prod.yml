@@ -14,7 +14,7 @@ services:
       MYSQL_USERNAME: toimc
       MYSQL_PASSWORD: mch2lvy2o9vdo32md7bbs6kd2e7ctdcy
     volumes:
-      - ./mysql_db:/var/lib/mysql
+      - ~/mysql_data/brian-backend:/var/lib/mysql
     ports:
       - 12000:3306
   db1:
